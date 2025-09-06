@@ -8,6 +8,15 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+// Wrapper enum values to avoid importing proto enums in user code.
+// These mirror v1.SearchMode values.
+// Use: xai.SearchModeOn, xai.SearchModeOff, xai.SearchModeAuto.
+const (
+	SearchModeOff  = v1.SearchMode_OFF_SEARCH_MODE
+	SearchModeOn   = v1.SearchMode_ON_SEARCH_MODE
+	SearchModeAuto = v1.SearchMode_AUTO_SEARCH_MODE
+)
+
 // Chat is a small convenience wrapper mirroring the Python-style API where you
 // build a request (chat = client.chat.create(...)) and then call chat.sample().
 // In Go, Sample simply invokes the synchronous GetCompletion RPC.
@@ -101,22 +110,23 @@ func NewsSource(excludedWebsites []string, country string, safeSearch bool) *v1.
 func RssSource(links []string) *v1.Source { return &v1.Source{Source: &v1.Source_Rss{Rss: &v1.RssSource{Links: links}}} }
 
 // SearchParameters builds SearchParameters with explicit mode, sources, and flags.
-// maxSearchResults may be nil to leave it unset. Provide any number of sources.
-func SearchParameters(mode v1.SearchMode, returnCitations bool, maxSearchResults *int32, sources ...*v1.Source) *v1.SearchParameters {
+// If maxSearchResults <= 0, it will be left unset. Provide any number of sources.
+func SearchParameters(mode v1.SearchMode, returnCitations bool, maxSearchResults int32, sources ...*v1.Source) *v1.SearchParameters {
 	sp := &v1.SearchParameters{
 		Mode:            mode,
 		Sources:         sources,
 		ReturnCitations: returnCitations,
 	}
-	if maxSearchResults != nil {
-		sp.MaxSearchResults = maxSearchResults
+	if maxSearchResults > 0 {
+		// take address of local copy; it will escape to heap as needed
+		sp.MaxSearchResults = &maxSearchResults
 	}
 	return sp
 }
 
 // SearchParametersWithDateRange builds SearchParameters and passes through optional from/to date range.
 // Provide nil for from or to to leave them unset.
-func SearchParametersWithDateRange(mode v1.SearchMode, returnCitations bool, maxSearchResults *int32, from, to *time.Time, sources ...*v1.Source) *v1.SearchParameters {
+func SearchParametersWithDateRange(mode v1.SearchMode, returnCitations bool, maxSearchResults int32, from, to *time.Time, sources ...*v1.Source) *v1.SearchParameters {
 	sp := SearchParameters(mode, returnCitations, maxSearchResults, sources...)
 	if from != nil {
 		sp.FromDate = timestamppb.New(*from)

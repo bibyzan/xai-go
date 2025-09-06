@@ -2,17 +2,22 @@
 
 Go client for X.ai gRPC APIs.
 
-Defaults
+## Defaults
 - Endpoint: api.x.ai:443 (TLS)
 - Only the API key is required to construct a client
 - Per-RPC timeout default: 60s
 
-Quick start
+## Quick start
 
 - Install:
+
+  ```sh
   go get github.com/bibyzan/xai
+  ```
 
 - Use:
+
+  ```go
   package main
 
   import (
@@ -20,6 +25,8 @@ Quick start
       "fmt"
       "log"
       "os"
+      "time"
+
       xai "github.com/bibyzan/xai"
   )
 
@@ -30,7 +37,7 @@ Quick start
       }
 
       client := xai.NewClient(apiKey)
-      defer client.Close()
+      defer func() { _ = client.Close() }()
 
       // Python-equivalent flow:
       // search_config = SearchParameters(sources=[x_source()], mode="on", return_citations=True, max_search_results=3)
@@ -42,15 +49,20 @@ Quick start
       chat := client.ChatCreateWithPrompt("grok-2", "Explain superconductors like I am five.", search)
 
       // Example 2: Mixed sources with passthrough arguments and date range
-      max := int32(10)
       from := time.Now().AddDate(0, -1, 0) // last month
       web := xai.WebSource(nil, []string{"wikipedia.org", "x.ai"}, "", true)
       rss := xai.RssSource([]string{"https://example.com/feed.xml"})
       xp := xai.XSourceWithArgs([]string{"xai"}, nil, nil, nil)
       search2 := xai.SearchParametersWithDateRange(
-          v1.SearchMode_ON_SEARCH_MODE, true, &max, &from, nil, web, rss, xp,
+          xai.SearchModeOn, true, 10, &from, nil, web, rss, xp,
       )
-      _ = search2 // use in another chat if desired
+
+      // Use search2 in another chat if desired
+      _ = search2
+
+      // Example 3: Regular SearchParameters (no date range)
+      reg := xai.SearchParameters(xai.SearchModeOn, true, 5, web, rss, xp)
+      _ = reg
 
       resp, err := chat.Sample(context.Background())
       if err != nil {
@@ -60,12 +72,14 @@ Quick start
           fmt.Println(resp.GetChoices()[0].GetMessage().GetContent())
       }
   }
+  ```
 
-Environment overrides
+## Environment overrides
 - XAI_API_HOST: override the endpoint (default: api.x.ai:443)
 - XAI_TIMEOUT: per-RPC timeout (e.g., 30s, 2m). Default: 60s
 - XAI_INSECURE: set to true/1/yes to disable TLS (local/dev only)
 
-Notes
+## Notes
 - TLS is enabled by default and connections go to port 443.
 - For advanced control (custom host, metadata, timeout, insecure), use NewClientWithOptions.
+- Each RPC includes your API key via the "x-api-key" header; set XAI_INSECURE=true only for local/dev without TLS.
