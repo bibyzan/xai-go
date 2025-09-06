@@ -1,11 +1,6 @@
 # xai-go
 
-Go client for X.ai gRPC APIs.
-
-## Defaults
-- Endpoint: api.x.ai:443 (TLS)
-- Only the API key is required to construct a client
-- Per-RPC timeout default: 60s
+Go wrapper client for X.ai gRPC APIs.
 
 ## Quick start
 
