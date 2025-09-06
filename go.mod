@@ -1,4 +1,4 @@
-module github.com/bibyzan/xai
+module github.com/bibyzan/xai-go
 
 go 1.24.2
 
