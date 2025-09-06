@@ -22,7 +22,7 @@ Go wrapper client for X.ai gRPC APIs.
       "os"
       "time"
 
-      "github.com/bibyzan/xai"
+      "github.com/bibyzan/xai-go"
   )
 
   func main() {
