@@ -27,7 +27,7 @@ Go client for X.ai gRPC APIs.
       "os"
       "time"
 
-      xai "github.com/bibyzan/xai"
+      "github.com/bibyzan/xai"
   )
 
   func main() {
@@ -39,12 +39,7 @@ Go client for X.ai gRPC APIs.
       client := xai.NewClient(apiKey)
       defer func() { _ = client.Close() }()
 
-      // Python-equivalent flow:
-      // search_config = SearchParameters(sources=[x_source()], mode="on", return_citations=True, max_search_results=3)
-      // chat = client.chat.create(model=model, messages=[user(prompt)], search_parameters=search_config)
-      // response = await asyncio.to_thread(chat.sample)
-
-      // Example 1: X source only (like Python example)
+      // Example 1: X source only
       search := xai.SearchParametersXOn(true, 3)
       chat := client.ChatCreateWithPrompt("grok-2", "Explain superconductors like I am five.", search)
 
