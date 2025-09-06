@@ -7,7 +7,7 @@ Go wrapper client for X.ai gRPC APIs.
 - Install:
 
   ```sh
-  go get github.com/bibyzan/xai
+  go get github.com/bibyzan/xai-go
   ```
 
 - Use:
